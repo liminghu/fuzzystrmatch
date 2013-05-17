@@ -417,3 +417,120 @@ damerau_levenshtein_internal(text *s, text *t,
 	return prev[m - 1];
 }
 
+
+#ifdef DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
+/*copied from:
+  * http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/tools/perf/util/levenshtein.c
+  */
+ 
+ /*
+  * This function implements the Damerau-Levenshtein algorithm to
+  * calculate a distance between strings.
+  *
+  * Basically, it says how many letters need to be swapped, substituted,
+  * deleted from, or added to string1, at least, to get string2.
+  *
+  * The idea is to build a distance matrix for the substrings of both
+  * strings.  To avoid a large space complexity, only the last three rows
+  * are kept in memory (if swaps had the same or higher cost as one deletion
+  * plus one insertion, only two rows would be needed).
+  *
+  * At any stage, "i + 1" denotes the length of the current substring of
+  * string1 that the distance is calculated for.
+  *
+  * row2 holds the current row, row1 the previous row (i.e. for the substring
+  * of string1 of length "i"), and row0 the row before that.
+  *
+  * In other words, at the start of the big loop, row2[j + 1] contains the
+  * Damerau-Levenshtein distance between the substring of string1 of length
+  * "i" and the substring of string2 of length "j + 1".
+  *
+  * All the big loop does is determine the partial minimum-cost paths.
+  *
+  * It does so by calculating the costs of the path ending in characters
+  * i (in string1) and j (in string2), respectively, given that the last
+  * operation is a substition, a swap, a deletion, or an insertion.
+  *
+  * This implementation allows the costs to be weighted:
+  *
+  * - w (as in "sWap")
+  * - s (as in "Substitution")
+  * - a (for insertion, AKA "Add")
+  * - d (as in "Deletion")
+  *
+  * Note that this algorithm calculates a distance _iff_ d == a.
+  */
+static int damerau_levenshtein_internal_noncompatible(text *s, text *t,
+					 int ins_c, int del_c, int sub_c, int trans_c)
+ {
+      
+	const char *s_data;
+	const char *t_data;
+       
+        int			m,
+				n,
+				s_bytes,
+				t_bytes;
+
+	/* Extract a pointer to the actual character data. */
+	s_data = VARDATA_ANY(s);
+	t_data = VARDATA_ANY(t);
+
+        const char *string1 = s_data;
+        const char *string2 = t_data;
+
+	/* Determine length of each string in bytes and characters. */
+	s_bytes = VARSIZE_ANY_EXHDR(s);
+	t_bytes = VARSIZE_ANY_EXHDR(t);
+        /* returns the length (counted in wchars) of a multibyte string
+         * (not necessarily NULL terminated)
+         */
+	m = pg_mbstrlen_with_len(s_data, s_bytes);
+	n = pg_mbstrlen_with_len(t_data, t_bytes);
+
+
+
+         int len1 = m, len2 = n;
+         int *row0 = malloc(sizeof(int) * (len2 + 1));
+         int *row1 = malloc(sizeof(int) * (len2 + 1));
+         int *row2 = malloc(sizeof(int) * (len2 + 1));
+         int i, j;
+ 
+         for (j = 0; j <= len2; j++)
+                 row1[j] = j * ins_c;
+         for (i = 0; i < len1; i++) {
+                 int *dummy;
+ 
+                 row2[0] = (i + 1) * del_c;
+                 for (j = 0; j < len2; j++) {
+                         /* substitution */
+                         row2[j + 1] = row1[j] + sub_c * (string1[i] != string2[j]);
+                         /* swap */
+                         if (i > 0 && j > 0 && string1[i - 1] == string2[j] &&
+                                         string1[i] == string2[j - 1] &&
+                                         row2[j + 1] > row0[j - 1] + trans_c)
+                                 row2[j + 1] = row0[j - 1] + trans_c;
+                         /* deletion */
+                         if (row2[j + 1] > row1[j + 1] + del_c)
+                                 row2[j + 1] = row1[j + 1] + del_c;
+                         /* insertion */
+                         if (row2[j + 1] > row2[j] + ins_c)
+                                 row2[j + 1] = row2[j] + ins_c;
+                 }
+ 
+                 dummy = row0;
+                 row0 = row1;
+                 row1 = row2;
+                 row2 = dummy;
+         }
+ 
+         i = row1[len2];
+         free(row0);
+         free(row1);
+         free(row2);
+ 
+         return i;  
+  }
+#endif
+
+

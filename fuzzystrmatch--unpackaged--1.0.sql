@@ -5,6 +5,8 @@
 
 ALTER EXTENSION fuzzystrmatch ADD function levenshtein(text,text);
 ALTER EXTENSION fuzzystrmatch ADD function levenshtein(text,text,integer,integer,integer);
+
+ALTER EXTENSION fuzzystrmatch ADD function dameraulevenshteinnoncompatible(text,text,integer,integer,integer,integer);
 ALTER EXTENSION fuzzystrmatch ADD function dameraulevenshtein(text,text);
 ALTER EXTENSION fuzzystrmatch ADD function dameraulevenshtein(text,text,integer,integer,integer,integer);
 ALTER EXTENSION fuzzystrmatch ADD function metaphone(text,integer);
@@ -30,4 +32,8 @@ LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION dameraulevenshtein_less_equal (text,text,int,int,int,int,int) RETURNS int
 AS 'MODULE_PATHNAME','dameraulevenshtein_less_equal_with_costs'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION dameraulevenshtein_less_equal_noncompatible (text,text,int,int,int,int,int) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein_less_equal_with_costs_noncompatible'
 LANGUAGE C IMMUTABLE STRICT;

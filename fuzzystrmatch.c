@@ -56,10 +56,14 @@ extern Datum levenshtein_with_costs(PG_FUNCTION_ARGS);
 extern Datum levenshtein(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal(PG_FUNCTION_ARGS);
+
+extern Datum damerau_levenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS);
+
 extern Datum damerau_levenshtein_with_costs(PG_FUNCTION_ARGS);
 extern Datum damerau_levenshtein(PG_FUNCTION_ARGS);
 extern Datum damerau_levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
 extern Datum damerau_levenshtein_less_equal(PG_FUNCTION_ARGS);
+
 extern Datum metaphone(PG_FUNCTION_ARGS);
 extern Datum soundex(PG_FUNCTION_ARGS);
 extern Datum difference(PG_FUNCTION_ARGS);
@@ -119,7 +123,7 @@ soundex_code(char letter)
 
 ***************************************************************************/
 
-#define META_ERROR			FALSE
+#define META_ERROR		FALSE
 #define META_SUCCESS		TRUE
 #define META_FAILURE		FALSE
 
@@ -245,7 +249,22 @@ levenshtein_less_equal(PG_FUNCTION_ARGS)
 
 #include "dameraulevenshtein.c"
 #define DAMERAU_LEVENSHTEIN_LESS_EQUAL
+#define DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
 #include "dameraulevenshtein.c"
+
+PG_FUNCTION_INFO_V1(damerau_levenshtein_with_costs_noncompatible);
+Datum
+damerau_levenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS)
+{
+	text	   *src = PG_GETARG_TEXT_PP(0);
+	text	   *dst = PG_GETARG_TEXT_PP(1);
+	int			ins_c = PG_GETARG_INT32(2);
+	int			del_c = PG_GETARG_INT32(3);
+	int			sub_c = PG_GETARG_INT32(4);
+        int 			trans_c = PG_GETARG_INT32(5);
+
+	PG_RETURN_INT32(damerau_levenshtein_internal_noncompatible(src, dst, ins_c, del_c, sub_c, trans_c));
+}
 
 PG_FUNCTION_INFO_V1(damerau_levenshtein_with_costs);
 Datum

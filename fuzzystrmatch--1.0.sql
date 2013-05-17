@@ -19,6 +19,10 @@ CREATE FUNCTION levenshtein_less_equal (text,text,int,int,int,int) RETURNS int
 AS 'MODULE_PATHNAME','levenshtein_less_equal_with_costs'
 LANGUAGE C IMMUTABLE STRICT;
 
+CREATE FUNCTION dameraulevenshteinnocompatible (text,text,int,int,int,int) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein_with_costs_noncompatible'
+LANGUAGE C IMMUTABLE STRICT;
+
 CREATE FUNCTION dameraulevenshtein (text,text) RETURNS int
 AS 'MODULE_PATHNAME','dameraulevenshtein'
 LANGUAGE C IMMUTABLE STRICT;
