@@ -1,4 +1,4 @@
-/* contrib/fuzzystrmatch/fuzzystrmatch--1.0.sql */
+/* contrib/fuzzystrmatch/fuzzystrmatch--1.1.sql */
 
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "CREATE EXTENSION fuzzystrmatch" to load this file. \quit
@@ -17,6 +17,22 @@ LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION levenshtein_less_equal (text,text,int,int,int,int) RETURNS int
 AS 'MODULE_PATHNAME','levenshtein_less_equal_with_costs'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION dameraulevenshtein (text,text) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION dameraulevenshtein (text,text,int,int,int,int) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein_with_costs'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION dameraulevenshtein_less_equal (text,text,int) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein_less_equal'
+LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION dameraulevenshtein_less_equal (text,text,int,int,int,int,int) RETURNS int
+AS 'MODULE_PATHNAME','dameraulevenshtein_less_equal_with_costs'
 LANGUAGE C IMMUTABLE STRICT;
 
 CREATE FUNCTION metaphone (text,int) RETURNS text

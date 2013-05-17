@@ -1,3 +1,6 @@
+ /*copied from:
+  * http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/tools/perf/util/levenshtein.c
+  */
  #include "cache.h"
  #include "levenshtein.h"
  

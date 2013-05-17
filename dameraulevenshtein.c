@@ -1,25 +1,4 @@
 /*
- * levenshtein.c
- *
- * Functions for "fuzzy" comparison of strings
- *
- * Joe Conway <mail@joeconway.com>
- *
- * Copyright (c) 2001-2011, PostgreSQL Global Development Group
- * ALL RIGHTS RESERVED;
- *
- * levenshtein()
- * -------------
- * Written based on a description of the algorithm by Michael Gilleland
- * found at http://www.merriampark.com/ld.htm
- * Also looked at levenshtein.c in the PHP 4.0.6 distribution for
- * inspiration.
- * Configurable penalty costs extension is introduced by Volkan
- * YAZICI <volkan.yazici@gmail.com>.
- */
-
-
-/*
  * dameraulevenshtein.c
  *
  * Functions for "fuzzy" comparison of strings
