@@ -17,7 +17,7 @@
  * Configurable penalty costs extension is introduced by Volkan
  * YAZICI <volkan.yazici@gmail.com>. 
  *
- * damerau_levenshtein()
+ * dameraulevenshtein()
  * Liming Hu <dawninghu@gmail.com>
  * description of the algorithm:
  *  http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
@@ -77,10 +77,10 @@ static int dameraulevenshtein_internal(text *s, text *t,
  */
 static int
 #ifdef DAMERAU_LEVENSHTEIN_LESS_EQUAL
-damerau_levenshtein_less_equal_internal(text *s, text *t,
+dameraulevenshtein_less_equal_internal(text *s, text *t,
 								int ins_c, int del_c, int sub_c, int trans_c, int max_d)
 #else
-damerau_levenshtein_internal(text *s, text *t,
+dameraulevenshtein_internal(text *s, text *t,
 					 int ins_c, int del_c, int sub_c, int trans_c)
 #endif
 {
@@ -98,7 +98,7 @@ damerau_levenshtein_internal(text *s, text *t,
 	const char *y;
 
 	/*
-	 * For damerau_levenshtein_less_equal_internal, we have real variables called
+	 * For dameraulevenshtein_less_equal_internal, we have real variables called
 	 * start_column and stop_column; otherwise it's just short-hand for 0 and
 	 * m.
 	 */
@@ -419,7 +419,7 @@ damerau_levenshtein_internal(text *s, text *t,
 
 
 #ifdef DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
-static int damerau_levenshtein_internal_noncompatible(text *s, text *t,
+static int dameraulevenshtein_internal_noncompatible(text *s, text *t,
 					 int ins_c, int del_c, int sub_c, int trans_c);
 /*copied from:
   * http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/tools/perf/util/levenshtein.c
@@ -462,7 +462,7 @@ static int damerau_levenshtein_internal_noncompatible(text *s, text *t,
   *
   * Note that this algorithm calculates a distance _iff_ d == a.
   */
-static int damerau_levenshtein_internal_noncompatible(text *s, text *t,
+static int dameraulevenshtein_internal_noncompatible(text *s, text *t,
 					 int ins_c, int del_c, int sub_c, int trans_c)
  {
       

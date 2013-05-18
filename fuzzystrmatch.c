@@ -57,12 +57,12 @@ extern Datum levenshtein(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal(PG_FUNCTION_ARGS);
 
-extern Datum damerau_levenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS);
+extern Datum dameraulevenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS);
 
-extern Datum damerau_levenshtein_with_costs(PG_FUNCTION_ARGS);
-extern Datum damerau_levenshtein(PG_FUNCTION_ARGS);
-extern Datum damerau_levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
-extern Datum damerau_levenshtein_less_equal(PG_FUNCTION_ARGS);
+extern Datum dameraulevenshtein_with_costs(PG_FUNCTION_ARGS);
+extern Datum dameraulevenshtein(PG_FUNCTION_ARGS);
+extern Datum dameraulevenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
+extern Datum dameraulevenshtein_less_equal(PG_FUNCTION_ARGS);
 
 extern Datum metaphone(PG_FUNCTION_ARGS);
 extern Datum soundex(PG_FUNCTION_ARGS);
@@ -252,9 +252,9 @@ levenshtein_less_equal(PG_FUNCTION_ARGS)
 #define DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
 #include "dameraulevenshtein.c"
 
-PG_FUNCTION_INFO_V1(damerau_levenshtein_with_costs_noncompatible);
+PG_FUNCTION_INFO_V1(dameraulevenshtein_with_costs_noncompatible);
 Datum
-damerau_levenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS)
+dameraulevenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS)
 {
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
@@ -263,12 +263,12 @@ damerau_levenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS)
 	int			sub_c = PG_GETARG_INT32(4);
         int 			trans_c = PG_GETARG_INT32(5);
 
-	PG_RETURN_INT32(damerau_levenshtein_internal_noncompatible(src, dst, ins_c, del_c, sub_c, trans_c));
+	PG_RETURN_INT32(dameraulevenshtein_internal_noncompatible(src, dst, ins_c, del_c, sub_c, trans_c));
 }
 
-PG_FUNCTION_INFO_V1(damerau_levenshtein_with_costs);
+PG_FUNCTION_INFO_V1(dameraulevenshtein_with_costs);
 Datum
-damerau_levenshtein_with_costs(PG_FUNCTION_ARGS)
+dameraulevenshtein_with_costs(PG_FUNCTION_ARGS)
 {
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
@@ -277,24 +277,24 @@ damerau_levenshtein_with_costs(PG_FUNCTION_ARGS)
 	int			sub_c = PG_GETARG_INT32(4);
         int 			trans_c = PG_GETARG_INT32(5);
 
-	PG_RETURN_INT32(damerau_levenshtein_internal(src, dst, ins_c, del_c, sub_c, trans_c));
+	PG_RETURN_INT32(dameraulevenshtein_internal(src, dst, ins_c, del_c, sub_c, trans_c));
 }
 
 
-PG_FUNCTION_INFO_V1(damerau_levenshtein);
+PG_FUNCTION_INFO_V1(dameraulevenshtein);
 Datum
-damerau_levenshtein(PG_FUNCTION_ARGS)
+dameraulevenshtein(PG_FUNCTION_ARGS)
 {
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 
-	PG_RETURN_INT32(damerau_levenshtein_internal(src, dst, 1, 1, 1, 1));
+	PG_RETURN_INT32(dameraulevenshtein_internal(src, dst, 1, 1, 1, 1));
 }
 
 
-PG_FUNCTION_INFO_V1(damerau_levenshtein_less_equal_with_costs);
+PG_FUNCTION_INFO_V1(dameraulevenshtein_less_equal_with_costs);
 Datum
-damerau_levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS)
+dameraulevenshtein_less_equal_with_costs(PG_FUNCTION_ARGS)
 {
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
@@ -304,19 +304,19 @@ damerau_levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS)
 	int 			trans_c = PG_GETARG_INT32(5);
 	int			max_d = PG_GETARG_INT32(6);
 
-	PG_RETURN_INT32(damerau_levenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, trans_c, max_d));
+	PG_RETURN_INT32(dameraulevenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, trans_c, max_d));
 }
 
 
-PG_FUNCTION_INFO_V1(damerau_levenshtein_less_equal);
+PG_FUNCTION_INFO_V1(dameraulevenshtein_less_equal);
 Datum
-damerau_levenshtein_less_equal(PG_FUNCTION_ARGS)
+dameraulevenshtein_less_equal(PG_FUNCTION_ARGS)
 {
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 	int			max_d = PG_GETARG_INT32(2);
 
-	PG_RETURN_INT32(damerau_levenshtein_less_equal_internal(src, dst, 1, 1, 1, 1, max_d));
+	PG_RETURN_INT32(dameraulevenshtein_less_equal_internal(src, dst, 1, 1, 1, 1, max_d));
 }
 
 
