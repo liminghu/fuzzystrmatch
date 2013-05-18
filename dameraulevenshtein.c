@@ -419,6 +419,8 @@ damerau_levenshtein_internal(text *s, text *t,
 
 
 #ifdef DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
+static int damerau_levenshtein_internal_noncompatible(text *s, text *t,
+					 int ins_c, int del_c, int sub_c, int trans_c);
 /*copied from:
   * http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/tools/perf/util/levenshtein.c
   */
