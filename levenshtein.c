@@ -5,7 +5,7 @@
  *
  * Joe Conway <mail@joeconway.com>
  *
- * Copyright (c) 2001-2011, PostgreSQL Global Development Group
+ * Copyright (c) 2001-2013, PostgreSQL Global Development Group
  * ALL RIGHTS RESERVED;
  *
  * levenshtein()
@@ -16,6 +16,12 @@
  * inspiration.
  * Configurable penalty costs extension is introduced by Volkan
  * YAZICI <volkan.yazici@gmail.com>.
+ * Damerau levenshtein variant
+ * Liming Hu <dawninghu@gmail.com>
+ * based on description of the algorithm:
+ * http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
+ * and:
+ * http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/tools/perf/util/levenshtein.c
  */
 
 /*
@@ -23,10 +29,10 @@
  */
 #ifdef LEVENSHTEIN_LESS_EQUAL
 static int levenshtein_less_equal_internal(text *s, text *t,
-								int ins_c, int del_c, int sub_c, int max_d);
+								int ins_c, int del_c, int sub_c, int trans_c, int max_d);
 #else
 static int levenshtein_internal(text *s, text *t,
-					 int ins_c, int del_c, int sub_c);
+					 int ins_c, int del_c, int sub_c, int trans_c);
 #endif
 
 #define MAX_LEVENSHTEIN_STRLEN		255
@@ -34,8 +40,8 @@ static int levenshtein_internal(text *s, text *t,
 
 /*
  * Calculates Levenshtein distance metric between supplied strings. Generally
- * (1, 1, 1) penalty costs suffices for common cases, but your mileage may
- * vary.
+ * (1, 1, 1 [, 1]) penalty costs suffices for common cases, but your mileage
+ * may vary.
  *
  * One way to compute Levenshtein distance is to incrementally construct
  * an (m+1)x(n+1) matrix where cell (i, j) represents the minimum number
@@ -66,10 +72,10 @@ static int levenshtein_internal(text *s, text *t,
 static int
 #ifdef LEVENSHTEIN_LESS_EQUAL
 levenshtein_less_equal_internal(text *s, text *t,
-								int ins_c, int del_c, int sub_c, int max_d)
+								int ins_c, int del_c, int sub_c, int trans_c, int max_d)
 #else
 levenshtein_internal(text *s, text *t,
-					 int ins_c, int del_c, int sub_c)
+					 int ins_c, int del_c, int sub_c, int trans_c)
 #endif
 {
 	int			m,
@@ -171,7 +177,7 @@ levenshtein_internal(text *s, text *t,
 			 * length.	Each additional deletion forces another insertion, so
 			 * the best-case total cost increases by ins_c + del_c. If the
 			 * string is shrinking, the minimum theoretical cost assumes no
-			 * excess deletions; that is, we're starting no futher right than
+			 * excess deletions; that is, we're starting no further right than
 			 * column n - m.  If we do start further right, the best-case
 			 * total cost increases by ins_c + del_c for each move right.
 			 */
@@ -275,6 +281,7 @@ levenshtein_internal(text *s, text *t,
 				int			ins;
 				int			del;
 				int			sub;
+				int			trans;
 				int			x_char_len = s_char_len[i - 1];
 
 				/*
@@ -310,6 +317,7 @@ levenshtein_internal(text *s, text *t,
 				int			ins;
 				int			del;
 				int			sub;
+				int			trans;
 
 				/* Calculate costs for insertion, deletion, and substitution. */
 				ins = prev[i] + ins_c;
@@ -349,8 +357,8 @@ levenshtein_internal(text *s, text *t,
 			 * remaining portions of the strings are of equal length.  There
 			 * are (n - 1) characters in the target string, of which j have
 			 * been transformed.  There are (m - 1) characters in the source
-			 * string, so we want to find the value for zp where where (n - 1)
-			 * - j = (m - 1) - zp.
+			 * string, so we want to find the value for zp where (n - 1) - j =
+			 * (m - 1) - zp.
 			 */
 			int			zp = j - (n - m);
 

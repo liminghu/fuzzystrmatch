@@ -5,10 +5,8 @@
  *
  * Joe Conway <mail@joeconway.com>
  *
- * Modified by Liming Hu <dawninghu@gmail.com>
- *
  * contrib/fuzzystrmatch/fuzzystrmatch.c
- * Copyright (c) 2001-2011, PostgreSQL Global Development Group
+ * Copyright (c) 2001-2013, PostgreSQL Global Development Group
  * ALL RIGHTS RESERVED;
  *
  * metaphone()
@@ -42,7 +40,6 @@
 
 #include <ctype.h>
 
-#include "fmgr.h"
 #include "mb/pg_wchar.h"
 #include "utils/builtins.h"
 
@@ -56,14 +53,10 @@ extern Datum levenshtein_with_costs(PG_FUNCTION_ARGS);
 extern Datum levenshtein(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
 extern Datum levenshtein_less_equal(PG_FUNCTION_ARGS);
-
-extern Datum dameraulevenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS);
-
 extern Datum dameraulevenshtein_with_costs(PG_FUNCTION_ARGS);
 extern Datum dameraulevenshtein(PG_FUNCTION_ARGS);
 extern Datum dameraulevenshtein_less_equal_with_costs(PG_FUNCTION_ARGS);
 extern Datum dameraulevenshtein_less_equal(PG_FUNCTION_ARGS);
-
 extern Datum metaphone(PG_FUNCTION_ARGS);
 extern Datum soundex(PG_FUNCTION_ARGS);
 extern Datum difference(PG_FUNCTION_ARGS);
@@ -123,7 +116,7 @@ soundex_code(char letter)
 
 ***************************************************************************/
 
-#define META_ERROR		FALSE
+#define META_ERROR			FALSE
 #define META_SUCCESS		TRUE
 #define META_FAILURE		FALSE
 
@@ -168,7 +161,7 @@ getcode(char c)
 /* These letters are passed through unchanged */
 #define NOCHANGE(c) (getcode(c) & 2)	/* FJMNR */
 
-/* These form dipthongs when preceding H */
+/* These form diphthongs when preceding H */
 #define AFFECTH(c)	(getcode(c) & 4)	/* CGPST */
 
 /* These make C and G soft */
@@ -178,7 +171,7 @@ getcode(char c)
 #define NOGHTOF(c)	(getcode(c) & 16)	/* BDH */
 
 /* Faster than memcmp(), for this use case. */
-static bool inline
+static inline bool
 rest_of_char_same(const char *s1, const char *s2, int len)
 {
 	while (len > 0)
@@ -204,7 +197,7 @@ levenshtein_with_costs(PG_FUNCTION_ARGS)
 	int			del_c = PG_GETARG_INT32(3);
 	int			sub_c = PG_GETARG_INT32(4);
 
-	PG_RETURN_INT32(levenshtein_internal(src, dst, ins_c, del_c, sub_c));
+	PG_RETURN_INT32(levenshtein_internal(src, dst, ins_c, del_c, sub_c, 0));
 }
 
 
@@ -215,7 +208,7 @@ levenshtein(PG_FUNCTION_ARGS)
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 
-	PG_RETURN_INT32(levenshtein_internal(src, dst, 1, 1, 1));
+	PG_RETURN_INT32(levenshtein_internal(src, dst, 1, 1, 1, 0));
 }
 
 
@@ -230,7 +223,7 @@ levenshtein_less_equal_with_costs(PG_FUNCTION_ARGS)
 	int			sub_c = PG_GETARG_INT32(4);
 	int			max_d = PG_GETARG_INT32(5);
 
-	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, max_d));
+	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, 0, max_d));
 }
 
 
@@ -242,28 +235,7 @@ levenshtein_less_equal(PG_FUNCTION_ARGS)
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 	int			max_d = PG_GETARG_INT32(2);
 
-	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, 1, 1, 1, max_d));
-}
-
-
-
-#include "dameraulevenshtein.c"
-#define DAMERAU_LEVENSHTEIN_LESS_EQUAL
-#define DAMERAU_LEVENSHTEIN_NONCOMPATIBLE
-#include "dameraulevenshtein.c"
-
-PG_FUNCTION_INFO_V1(dameraulevenshtein_with_costs_noncompatible);
-Datum
-dameraulevenshtein_with_costs_noncompatible(PG_FUNCTION_ARGS)
-{
-	text	   *src = PG_GETARG_TEXT_PP(0);
-	text	   *dst = PG_GETARG_TEXT_PP(1);
-	int			ins_c = PG_GETARG_INT32(2);
-	int			del_c = PG_GETARG_INT32(3);
-	int			sub_c = PG_GETARG_INT32(4);
-        int 			trans_c = PG_GETARG_INT32(5);
-
-	PG_RETURN_INT32(dameraulevenshtein_internal_noncompatible(src, dst, ins_c, del_c, sub_c, trans_c));
+	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, 1, 1, 1, 0, max_d));
 }
 
 PG_FUNCTION_INFO_V1(dameraulevenshtein_with_costs);
@@ -275,9 +247,9 @@ dameraulevenshtein_with_costs(PG_FUNCTION_ARGS)
 	int			ins_c = PG_GETARG_INT32(2);
 	int			del_c = PG_GETARG_INT32(3);
 	int			sub_c = PG_GETARG_INT32(4);
-        int 			trans_c = PG_GETARG_INT32(5);
+	int			trans_c = PG_GETARG_INT32(5);
 
-	PG_RETURN_INT32(dameraulevenshtein_internal(src, dst, ins_c, del_c, sub_c, trans_c));
+	PG_RETURN_INT32(levenshtein_internal(src, dst, ins_c, del_c, sub_c, trans_c));
 }
 
 
@@ -288,7 +260,7 @@ dameraulevenshtein(PG_FUNCTION_ARGS)
 	text	   *src = PG_GETARG_TEXT_PP(0);
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 
-	PG_RETURN_INT32(dameraulevenshtein_internal(src, dst, 1, 1, 1, 1));
+	PG_RETURN_INT32(levenshtein_internal(src, dst, 1, 1, 1, 1));
 }
 
 
@@ -301,10 +273,10 @@ dameraulevenshtein_less_equal_with_costs(PG_FUNCTION_ARGS)
 	int			ins_c = PG_GETARG_INT32(2);
 	int			del_c = PG_GETARG_INT32(3);
 	int			sub_c = PG_GETARG_INT32(4);
-	int 			trans_c = PG_GETARG_INT32(5);
+	int			trans_c = PG_GETARG_INT32(5);
 	int			max_d = PG_GETARG_INT32(6);
 
-	PG_RETURN_INT32(dameraulevenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, trans_c, max_d));
+	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, ins_c, del_c, sub_c, trans_c, max_d));
 }
 
 
@@ -316,10 +288,8 @@ dameraulevenshtein_less_equal(PG_FUNCTION_ARGS)
 	text	   *dst = PG_GETARG_TEXT_PP(1);
 	int			max_d = PG_GETARG_INT32(2);
 
-	PG_RETURN_INT32(dameraulevenshtein_less_equal_internal(src, dst, 1, 1, 1, 1, max_d));
+	PG_RETURN_INT32(levenshtein_less_equal_internal(src, dst, 1, 1, 1, 1, max_d));
 }
-
-
 
 /*
  * Calculates the metaphone of an input string.
