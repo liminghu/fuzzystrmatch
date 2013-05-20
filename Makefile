@@ -17,5 +17,5 @@ include $(top_builddir)/src/Makefile.global
 include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
-# dameraulevenshtein.c, levenshtein.c is #included by fuzzystrmatch.c
-fuzzystrmatch.o: fuzzystrmatch.c levenshtein.c dameraulevenshtein.c
+# levenshtein.c is #included by fuzzystrmatch.c
+fuzzystrmatch.o: fuzzystrmatch.c levenshtein.c
